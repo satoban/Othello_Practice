@@ -150,6 +150,89 @@ class Board:
     """
     def flipDiscs(self, x, y):
         self.RawBoard[x,y]  = self.CurrentColor
+        #石を裏返す
+        dir = self.MovableDir[x,y]
+        
+        ##左
+        if dir & LEFT:
+            x_tmp = x - 1
+            #相手の石がある限りループする
+            while self.RawBoard[x_tmp,y] == -self.CurrentColor:
+                #相手の石があるマスを自分の石の色に塗り替えている
+                self.RawBoard[x_tmp, y] = self.CurrentColor
+                #さらに1マス左に進めてループを回す
+                x_tmp -= 1
+        ##左上
+        if dir & UPPER_LEFT:
+            x_tmp = x - 1
+            y_tmp = y - 1
+            #相手の石がある限りループする
+            while self.RawBoard[x_tmp, y_tmp] == -self.CurrentColor:
+                #相手の石があるマスを自分の石の色に塗り替えている
+                self.RawBoard[x_tmp, y_tmp] = self.CurrentColor
+                #さらに1マス左上に進めてループを回す
+                x_tmp -= 1
+                y_tmp -= 1
+        ##上
+        if dir & UPPER:
+            y_tmp = y - 1
+            #相手の石がある限りループする
+            while self.RawBoard[x, y_tmp] == -self.CurrentColor:
+                #相手の石があるマスを自分の石の色に塗り替えている
+                self.RawBoard[x, y_tmp] = self.CurrentColor
+                #さらに1マス上に進めてループを回す
+                y_tmp -= 1
+        ##右上
+        if dir & UPPER_RIGHT:
+            x_tmp = x + 1
+            y_tmp = y - 1
+            #相手の石がある限りループする
+            while self.RawBoard[x_tmp,y_tmp] == -self.CurrentColor:
+                #相手の石があるマスを自分の石の色に塗り替えている
+                self.RawBoard[x_tmp, y_tmp] = self.CurrentColor
+                #さらに1マス右上に進めてループを回す
+                x_tmp += 1
+                y_tmp -= 1
+        ##右
+        if dir & RIGHT:
+            x_tmp = x + 1
+            #相手の石がある限りループする
+            while self.RawBoard[x_tmp, y] == -self.CurrentColor:
+                #相手の石があるマスを自分の石の色に塗り替えている
+                self.RawBoard[x_tmp, y] = self.CurrentColor
+                #さらに1マス右に進めてループを回す
+                x_tmp += 1
+        ##右下
+        if dir & LOWER_RIGHT:
+            x_tmp = x + 1
+            y_tmp = y + 1
+            #相手の石がある限りループする
+            while self.RawBoard[x_tmp,y_tmp] == -self.CurrentColor:
+                #相手の石があるマスを自分の石の色に塗り替えている
+                self.RawBoard[x_tmp, y_tmp] = self.CurrentColor
+                #さらに1マス右下に進めてループを回す
+                x_tmp += 1
+                y_tmp += 1
+        ##下
+        if dir & LOWER:
+            y_tmp = y + 1
+            #相手の石がある限りループする
+            while self.RawBoard[x ,y_tmp] == -self.CurrentColor:
+                #相手の石があるマスを自分の石の色に塗り替えている
+                self.RawBoard[x, y_tmp] = self.CurrentColor
+                #さらに1マス下に進めてループを回す
+                y_tmp += 1
+        ##左下
+        if dir & LOWER_LEFT:
+            x_tmp = x - 1
+            y_tmp = y + 1
+            #相手の石がある限りループする
+            while self.RawBoard[x_tmp,y_tmp] == -self.CurrentColor:
+                #相手の石があるマスを自分の石の色に塗り替えている
+                self.RawBoard[x_tmp, y_tmp] = self.CurrentColor
+                #さらに1マス左下に進めてループを回す
+                x_tmp -= 1
+                y_tmp += 1
         """
         石を置く関数
         """
@@ -186,6 +269,8 @@ class Board:
                     self.MovablePos[x,y] = True
 
 board = Board()
+if not board.move(4,3):
+    print('そこには置けません')
 #テスト
 # RawBoardの中身を確認
 print('RawBoard')
