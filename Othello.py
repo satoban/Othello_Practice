@@ -1,3 +1,10 @@
+"""
+プログラムの元ネタ
+Pythonと機械学習のサイト 様
+https://ruby-de-free.net/wp/how-to-make-othello-program-using-python-7/
+"""
+import sys
+import random
 import numpy as np
 #マスの状態
 EMPTY = 0#空きマス
@@ -25,6 +32,12 @@ IN_NUMBER = ['1','2','3','4','5','6','7','8']
 
 #手数の表現
 MAX_TURNS = 60
+
+#人間の色
+if len(sys.argv) == 2:
+    HUMAN_COLOR = sys.argv[1]
+else:
+    HUMAN_COLOR = ''
 
 """"
 ボードの変数の設定と初期配置を行うクラス
@@ -55,6 +68,14 @@ class Board:
         self.MovableDir = np.zeros((BOARD_SIZE + 2, BOARD_SIZE + 2), dtype=int)
         #MovablePosとMovableDirを更新
         self.initMovable()
+        #ユーザの石の色をhumancolorに格納
+        if HUMAN_COLOR == 'B':
+            self.HUMAN_COLOR = BLACK
+        elif HUMAN_COLOR == 'W':
+            self.HUMAN_COLOR = WHITE
+        else:
+            print('引数にBかWを指定してください')
+            sys.exit()
     """
     どの方向に石が裏返るかチェックする関数
     """
@@ -279,7 +300,7 @@ class Board:
     """
     def display(self):
         #横軸
-        print('  a b c d e f g h')
+        print('   a  b  c  d  e  f  g  h')
         #縦軸方向へのマスループ
         for y in range(1,9):
             #縦軸
@@ -326,6 +347,36 @@ class Board:
                     return False
         #ここまでたどり着いたらゲームは終わる
         return True
+    """
+    パスの判定
+    """
+    def skip(self):
+        #すべての要素が0の時だけパス
+        if any(MovablePos[:,:]):
+            return False
+        #ゲームが終了している時はパスできない
+        if isGameOver():
+            return False
+        #ここまで来たらパスなので手番を変える
+        self.CurrentColor = -self.CurrentColor
+        #MovablePosとMobleDirの更新
+        self.initMovable()
+        return True
+    """
+    ランダムに手を打つCPU
+    """
+    def randomInput(self):
+        #マス判定(skip)をして置けるマスが無い場合はFalseを返す
+        if board.skip == True:
+            return False
+        #置けるマスのインデックスをgridsに格納
+        grids = np.where(self.MovablePos == 1)
+        #候補からランダムに手を選ぶ
+        random_chosen_index = random.randrange(len(grids[0]))
+        x_grid = grids[0][random_chosen_index]
+        y_grid = grids[1][random_chosen_index]
+        #オセロの正式な座標表現で返す
+        return IN_ALPHABET[x_grid-1] + IN_NUMBER[y_grid-1]
 
 """
 実行コード  
@@ -352,11 +403,21 @@ while True:
     board.display()
     #手番の表示と入力
     if board.CurrentColor == BLACK:
-        print('黒の番です: ',end='')
+        print('黒の番です:',end="")
     else:
-        print('白の番です: ',end='')
-    IN = input()
+        print('白の番です:',end="")
+
+    #CPU or 人間
+    if board.CurrentColor == board.HUMAN_COLOR:
+        IN = input()#人間の手を入力
+    else:
+        IN = board.randomInput()#ランダムAI
+        print(IN)
     print()
+    #対戦を終了
+    if IN == "e":
+        print('おつかれ')
+        break
     #入力手をチェック
     if board.checkIN(IN):
         x = IN_ALPHABET.index(IN[0]) + 1
@@ -390,7 +451,7 @@ print('黒:', count_black)
 print('白:', count_white)
 
 #勝敗
-dif  = count_black - count_black
+dif  = count_black - count_white
 if dif > 0:
     print('黒の勝ち')
 elif dif < 0:
