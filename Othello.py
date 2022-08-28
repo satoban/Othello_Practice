@@ -23,6 +23,9 @@ LOWER_LEFT = 2**7 #128
 IN_ALPHABET = ['a','b','c','d','e','f','g','h']
 IN_NUMBER = ['1','2','3','4','5','6','7','8']
 
+#手数の表現
+MAX_TURNS = 60
+
 """"
 ボードの変数の設定と初期配置を行うクラス
 """
@@ -305,20 +308,92 @@ class Board:
             if IN[1] in IN_NUMBER:
                 return True
         return False
+    """
+    終局判定
+    """
+    def isGameOver(self):
+        #60手に達していたらゲーム終了
+        if self.Turns >= MAX_TURNS:
+            return True
+        #(現在の手番)打てる手がある場合はゲームを終了しない
+        if self.MovablePos[:,:].any():
+            return False
+        #(相手の手番)打てる手がある場合はゲームを終了しない
+        for x in range(1,BOARD_SIZE+1):
+            for y in range(1, BOARD_SIZE+1):
+                #置ける場所が1つでもある場合はゲーム終了でない
+                if self.checkMobility(x, y, -self.CurrentColor):
+                    return False
+        #ここまでたどり着いたらゲームは終わる
+        return True
 
+"""
+実行コード  
+"""
 board = Board()
-board.display()
-#手を入力
-print('手を入力していください: ',end='')
-IN = input()
-#入力手をチェック
-if board.checkIN(IN):
-    x = IN_ALPHABET.index(IN[0]) + 1
-    y = IN_NUMBER.index(IN[1]) + 1
-else:
-    print('正しい形式(例:f5)で入力してください')
+"""
+# テスト用初期盤面
+board.RawBoard = np.array([
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+    [2, 1, 1, 1, 1, 1, 1, 1, 1, 2],
+    [2, 1, 1,-1,-1, 1, 1, 1, 1, 2],
+    [2, 1, 1,-1,-1,-1, 1,-1, 1, 2],
+    [2, 1, 1, 1,-1, 1, 1, 1, 1, 2],
+    [2, 1, 1,-1, 1,-1,-1, 0, 1, 2],
+    [2, 1,-1, 1, 1, 1, 1, 1, 1, 2],
+    [2, 1, 0,-1,-1,-1,-1, 1, 1, 2],
+    [2, 1, 0, 0, 0, 0,-1, 1, 1, 2],
+    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]])
+board.initMovable()
+"""
+#手番ループ
+while True:
+    #盤面の表示
+    board.display()
+    #手番の表示と入力
+    if board.CurrentColor == BLACK:
+        print('黒の番です: ',end='')
+    else:
+        print('白の番です: ',end='')
+    IN = input()
+    print()
+    #入力手をチェック
+    if board.checkIN(IN):
+        x = IN_ALPHABET.index(IN[0]) + 1
+        y = IN_NUMBER.index(IN[1]) + 1
+    else:
+        print('正しい形式(例:f5)で入力してください')
+        continue
+    if not board.move(x,y):
+        print('そこには置けません')
+        continue
+    #終局判定
+    if board.isGameOver():
+        board.display()
+        print('おわり')
+        break
+    #パス
+    if not board.MovablePos[:,:].any():
+        board.CurrentColor = -board.CurrentColor
+        board.initMovable()
+        print('パスしました')
+        print()
+        continue
 
-if not board.move(x,y):
-    print('そこには置けません')
-#盤面の表示
-board.display()
+#ゲーム終了後の表示
+print()
+
+##各色の数
+count_black = np.count_nonzero(board.RawBoard[:,:] == BLACK)
+count_white = np.count_nonzero(board.RawBoard[:,:] == WHITE)
+print('黒:', count_black)
+print('白:', count_white)
+
+#勝敗
+dif  = count_black - count_black
+if dif > 0:
+    print('黒の勝ち')
+elif dif < 0:
+    print('白の勝ち')
+else:
+    print('引き分け')
