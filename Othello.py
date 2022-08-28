@@ -19,6 +19,10 @@ LOWER_RIGHT = 2**5 #32
 LOWER = 2**6 #64
 LOWER_LEFT = 2**7 #128
 
+#手の表現
+IN_ALPHABET = ['a','b','c','d','e','f','g','h']
+IN_NUMBER = ['1','2','3','4','5','6','7','8']
+
 """"
 ボードの変数の設定と初期配置を行うクラス
 """
@@ -267,28 +271,54 @@ class Board:
                 #dirが0じゃないときにMovablePosにTrueを代入
                 if dir != 0:
                     self.MovablePos[x,y] = True
+    """
+    オセロ盤面の表示
+    """
+    def display(self):
+        #横軸
+        print('  a b c d e f g h')
+        #縦軸方向へのマスループ
+        for y in range(1,9):
+            #縦軸
+            print(y,end=" ")
+            #横軸方向へのマスのループ
+            for x in range(1,9):
+                #マスの種類（数値）をgridに代入
+                grid = self.RawBoard[x,y]
+                #マスの種類によって表示を変化
+                if  grid == EMPTY:
+                    print('□', end=" ")
+                elif grid == WHITE:
+                    print('●',end=" ")
+                elif grid == BLACK:
+                    print('○', end=" ")
+            print()
+    """
+    入力された手の形式をチェック
+    """
+    def checkIN(self, N):
+        #INが空じゃないかをチェック
+        if not IN:
+            return False
+        #INの1文字目と2文字目がそれぞれa~h,1~8の範囲内であるかをチェック
+        if IN[0] in IN_ALPHABET:
+            if IN[1] in IN_NUMBER:
+                return True
+        return False
 
 board = Board()
-if not board.move(4,3):
+board.display()
+#手を入力
+print('手を入力していください: ',end='')
+IN = input()
+#入力手をチェック
+if board.checkIN(IN):
+    x = IN_ALPHABET.index(IN[0]) + 1
+    y = IN_NUMBER.index(IN[1]) + 1
+else:
+    print('正しい形式(例:f5)で入力してください')
+
+if not board.move(x,y):
     print('そこには置けません')
-#テスト
-# RawBoardの中身を確認
-print('RawBoard')
-for y in range(10):
-    for x in range(10):
-        print('{:^3}'.format(board.RawBoard[x, y]), end = '')
-    print()
-
-# MovablePosの中身を確認
-print('MovablePos')
-for y in range(10):
-    for x in range(10):
-        print('{:^3}'.format(board.MovablePos[x, y]), end = '')
-    print()
-
-# MovableDirの中身を確認
-print('MovableDir')
-for y in range(10):
-    for x in range(10):
-        print('{:^3}'.format(board.MovableDir[x, y]), end = '')
-    print()
+#盤面の表示
+board.display()
